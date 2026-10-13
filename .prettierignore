@@ -1,0 +1,6 @@
+dist/
+coverage/
+TestResults/
+node_modules/
+ai/**
+*.log
