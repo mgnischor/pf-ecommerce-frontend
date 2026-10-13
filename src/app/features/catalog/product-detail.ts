@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { finalize, map, switchMap } from 'rxjs';
+import { catchError, EMPTY, map, switchMap, tap } from 'rxjs';
 import { toProblemDetails, type ProblemDetails } from '../../core/http/http-errors';
 import { Logger } from '../../core/observability/logger.service';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
@@ -46,17 +46,29 @@ export class ProductDetail {
         this.route.paramMap
             .pipe(
                 map((params) => params.get('id') ?? ''),
-                switchMap((id) => this.products.getById(id)),
-                finalize(() => this.isLoading.set(false)),
+                tap(() => {
+                    this.isLoading.set(true);
+                    this.product.set(null);
+                    this.problem.set(null);
+                }),
+                // The inner stream owns failure handling so one failed load never ends the
+                // route subscription: navigating to another product recovers by itself.
+                switchMap((id) =>
+                    this.products.getById(id).pipe(
+                        catchError((error: unknown) => {
+                            const problem = toProblemDetails(error);
+                            this.problem.set(problem);
+                            this.isLoading.set(false);
+                            this.logger.warn('Product detail failed', { status: String(problem.status) });
+                            return EMPTY;
+                        })
+                    )
+                ),
                 takeUntilDestroyed(this.destroy)
             )
-            .subscribe({
-                next: (product) => this.product.set(product),
-                error: (error: unknown) => {
-                    const problem = toProblemDetails(error);
-                    this.problem.set(problem);
-                    this.logger.warn('Product detail failed', { status: String(problem.status) });
-                },
+            .subscribe((product) => {
+                this.product.set(product);
+                this.isLoading.set(false);
             });
     }
 }
