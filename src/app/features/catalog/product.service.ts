@@ -14,70 +14,70 @@ import type { CreateProductInput, Product, ProductListQuery, UpdateProductInput 
  */
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private readonly api = inject(ApiClient);
+    private readonly api = inject(ApiClient);
 
-  list(query: ProductListQuery = {}): Observable<PagedResult<Product>> {
-    let params: HttpParams = this.api.pageParams(query);
-    if (query.status) {
-      params = params.set('status', query.status);
+    list(query: ProductListQuery = {}): Observable<PagedResult<Product>> {
+        let params: HttpParams = this.api.pageParams(query);
+        if (query.status) {
+            params = params.set('status', query.status);
+        }
+        return this.api.get<PagedResult<Product>>('/products', {
+            headers: new HttpHeaders({ 'X-Skip-Auth': '1' }),
+            params,
+        });
     }
-    return this.api.get<PagedResult<Product>>('/products', {
-      headers: new HttpHeaders({ 'X-Skip-Auth': '1' }),
-      params,
-    });
-  }
 
-  getById(id: string): Observable<Product> {
-    return this.api.get<Product>(`/products/${encodeURIComponent(id)}`, {
-      headers: new HttpHeaders({ 'X-Skip-Auth': '1' }),
-    });
-  }
+    getById(id: string): Observable<Product> {
+        return this.api.get<Product>(`/products/${encodeURIComponent(id)}`, {
+            headers: new HttpHeaders({ 'X-Skip-Auth': '1' }),
+        });
+    }
 
-  create(input: CreateProductInput): Observable<Product> {
-    return this.api.post<CreateProductInput, Product>('/products', input, {
-      headers: new HttpHeaders({ 'Idempotency-Key': newIdempotencyKey() }),
-    });
-  }
+    create(input: CreateProductInput): Observable<Product> {
+        return this.api.post<CreateProductInput, Product>('/products', input, {
+            headers: new HttpHeaders({ 'Idempotency-Key': newIdempotencyKey() }),
+        });
+    }
 
-  rename(id: string, input: UpdateProductInput, version: number): Observable<Product> {
-    return this.api.patch<UpdateProductInput, Product>(`/products/${encodeURIComponent(id)}`, input, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/merge-patch+json',
-        'If-Match': `"${version}"`,
-      }),
-    });
-  }
+    rename(id: string, input: UpdateProductInput, version: number): Observable<Product> {
+        return this.api.patch<UpdateProductInput, Product>(`/products/${encodeURIComponent(id)}`, input, {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/merge-patch+json',
+                'If-Match': `"${version}"`,
+            }),
+        });
+    }
 
-  changePrice(id: string, price: Money, version: number): Observable<Product> {
-    return this.api.put<{ price: Money }, Product>(
-      `/products/${encodeURIComponent(id)}/price`,
-      { price },
-      { headers: new HttpHeaders({ 'If-Match': `"${version}"` }) }
-    );
-  }
+    changePrice(id: string, price: Money, version: number): Observable<Product> {
+        return this.api.put<{ price: Money }, Product>(
+            `/products/${encodeURIComponent(id)}/price`,
+            { price },
+            { headers: new HttpHeaders({ 'If-Match': `"${version}"` }) }
+        );
+    }
 
-  activate(id: string, version: number): Observable<Product> {
-    return this.api.post<Record<string, never>, Product>(
-      `/products/${encodeURIComponent(id)}/activation`,
-      {},
-      { headers: new HttpHeaders({ 'If-Match': `"${version}"` }) }
-    );
-  }
+    activate(id: string, version: number): Observable<Product> {
+        return this.api.post<Record<string, never>, Product>(
+            `/products/${encodeURIComponent(id)}/activation`,
+            {},
+            { headers: new HttpHeaders({ 'If-Match': `"${version}"` }) }
+        );
+    }
 
-  discontinue(id: string, version: number): Observable<Product> {
-    return this.api.post<Record<string, never>, Product>(
-      `/products/${encodeURIComponent(id)}/discontinuation`,
-      {},
-      { headers: new HttpHeaders({ 'If-Match': `"${version}"` }) }
-    );
-  }
+    discontinue(id: string, version: number): Observable<Product> {
+        return this.api.post<Record<string, never>, Product>(
+            `/products/${encodeURIComponent(id)}/discontinuation`,
+            {},
+            { headers: new HttpHeaders({ 'If-Match': `"${version}"` }) }
+        );
+    }
 
-  remove(id: string, version: number): Observable<void> {
-    return this.api.delete<void>(`/products/${encodeURIComponent(id)}`, {
-      headers: new HttpHeaders({
-        'Idempotency-Key': newIdempotencyKey(),
-        'If-Match': `"${version}"`,
-      }),
-    });
-  }
+    remove(id: string, version: number): Observable<void> {
+        return this.api.delete<void>(`/products/${encodeURIComponent(id)}`, {
+            headers: new HttpHeaders({
+                'Idempotency-Key': newIdempotencyKey(),
+                'If-Match': `"${version}"`,
+            }),
+        });
+    }
 }

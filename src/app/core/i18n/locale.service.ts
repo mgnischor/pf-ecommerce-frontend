@@ -8,15 +8,15 @@ import { inject, Injectable, signal } from '@angular/core';
  */
 @Injectable({ providedIn: 'root' })
 export class LocaleService {
-  private readonly current = signal('en');
+    private readonly current = signal('en');
 
-  readonly locale = this.current.asReadonly();
+    readonly locale = this.current.asReadonly();
 
-  setLocale(locale: string): void {
-    this.current.set(locale);
-  }
+    setLocale(locale: string): void {
+        this.current.set(locale);
+    }
 }
 
 export function injectLocale(): LocaleService {
-  return inject(LocaleService);
+    return inject(LocaleService);
 }

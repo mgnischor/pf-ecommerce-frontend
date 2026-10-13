@@ -6,17 +6,17 @@
 export type AccessLevel = 'public' | 'collaborator' | 'manager' | 'administrator' | 'developer';
 
 const RANK: Record<AccessLevel, number> = {
-  public: 0,
-  collaborator: 1,
-  manager: 2,
-  administrator: 3,
-  developer: 4,
+    public: 0,
+    collaborator: 1,
+    manager: 2,
+    administrator: 3,
+    developer: 4,
 };
 
 /** True when `actual` satisfies the `minimum` level required by a route. */
 export function satisfiesAccessLevel(actual: AccessLevel | null, minimum: AccessLevel): boolean {
-  if (actual === null) {
-    return minimum === 'public';
-  }
-  return RANK[actual] >= RANK[minimum];
+    if (actual === null) {
+        return minimum === 'public';
+    }
+    return RANK[actual] >= RANK[minimum];
 }

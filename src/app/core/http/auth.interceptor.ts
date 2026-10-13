@@ -8,13 +8,13 @@ import { AuthStore } from '../auth/auth.store';
  * X-Skip-Auth: 1, so the default stays authenticated (default-deny).
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const store = inject(AuthStore);
-  if (req.headers.has('X-Skip-Auth')) {
-    return next(req.clone({ headers: req.headers.delete('X-Skip-Auth') }));
-  }
-  const token = store.accessToken();
-  if (token === null) {
-    return next(req);
-  }
-  return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));
+    const store = inject(AuthStore);
+    if (req.headers.has('X-Skip-Auth')) {
+        return next(req.clone({ headers: req.headers.delete('X-Skip-Auth') }));
+    }
+    const token = store.accessToken();
+    if (token === null) {
+        return next(req);
+    }
+    return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));
 };

@@ -6,8 +6,8 @@ import type { HttpInterceptorFn } from '@angular/common/http';
  * randomness source needed on the client; no Math.random anywhere.
  */
 export const correlationInterceptor: HttpInterceptorFn = (req, next) => {
-  if (req.headers.has('X-Request-ID')) {
-    return next(req);
-  }
-  return next(req.clone({ setHeaders: { 'X-Request-ID': crypto.randomUUID() } }));
+    if (req.headers.has('X-Request-ID')) {
+        return next(req);
+    }
+    return next(req.clone({ setHeaders: { 'X-Request-ID': crypto.randomUUID() } }));
 };

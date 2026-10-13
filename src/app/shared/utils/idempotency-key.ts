@@ -5,5 +5,5 @@
  * distinct payloads (backend ai/API_CONTRACTS.md section 11.2).
  */
 export function newIdempotencyKey(): string {
-  return crypto.randomUUID();
+    return crypto.randomUUID();
 }

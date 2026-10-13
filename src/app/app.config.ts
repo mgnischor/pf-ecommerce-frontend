@@ -10,11 +10,14 @@ import { languageInterceptor } from './core/http/language.interceptor';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch(), withInterceptors([correlationInterceptor, languageInterceptor, authInterceptor])),
-    { provide: API_BASE_URL, useValue: environment.apiBaseUrl },
-    { provide: DEFAULT_LOCALE, useValue: environment.defaultLocale },
-  ],
+    providers: [
+        provideBrowserGlobalErrorListeners(),
+        provideRouter(routes, withComponentInputBinding()),
+        provideHttpClient(
+            withFetch(),
+            withInterceptors([correlationInterceptor, languageInterceptor, authInterceptor])
+        ),
+        { provide: API_BASE_URL, useValue: environment.apiBaseUrl },
+        { provide: DEFAULT_LOCALE, useValue: environment.defaultLocale },
+    ],
 };

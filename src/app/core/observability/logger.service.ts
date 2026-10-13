@@ -7,11 +7,11 @@ import { Injectable } from '@angular/core';
  */
 @Injectable({ providedIn: 'root' })
 export class Logger {
-  warn(message: string, context?: Record<string, string>): void {
-    console.warn(message, context ?? {});
-  }
+    warn(message: string, context?: Record<string, string>): void {
+        console.warn(message, context ?? {});
+    }
 
-  error(message: string, context?: Record<string, string>): void {
-    console.error(message, context ?? {});
-  }
+    error(message: string, context?: Record<string, string>): void {
+        console.error(message, context ?? {});
+    }
 }

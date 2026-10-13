@@ -9,19 +9,19 @@ import type { Money } from '../../core/api/api.models';
  */
 @Pipe({ name: 'appMoney', standalone: true })
 export class MoneyPipe implements PipeTransform {
-  private readonly locale = inject(LOCALE_ID);
+    private readonly locale = inject(LOCALE_ID);
 
-  transform(value: Money | null | undefined): string {
-    if (value === null || value === undefined) {
-      return '';
+    transform(value: Money | null | undefined): string {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        const amount = Number(value.amount);
+        if (!Number.isFinite(amount)) {
+            return '';
+        }
+        return new Intl.NumberFormat(this.locale, {
+            style: 'currency',
+            currency: value.currency,
+        }).format(amount);
     }
-    const amount = Number(value.amount);
-    if (!Number.isFinite(amount)) {
-      return '';
-    }
-    return new Intl.NumberFormat(this.locale, {
-      style: 'currency',
-      currency: value.currency,
-    }).format(amount);
-  }
 }
