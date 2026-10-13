@@ -16,7 +16,7 @@ WORKDIR /src
 
 # Restore has its own layer, keyed only on the files that define the dependency graph.
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci --frozen-lockfile
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY . ./
 RUN npm run build:ci

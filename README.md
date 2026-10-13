@@ -59,7 +59,7 @@ shared contracts live in `core/`.
 ## Getting Started
 
 ```bash
-npm ci --frozen-lockfile
+npm ci
 npm start
 ```
 
@@ -150,7 +150,7 @@ Renovate/Dependabot is tracked as `TODO(frontend-infra)` in the Dockerfile.
 Defined by `ai/CODE.md` and enforced locally and in `.github/workflows/ci.yml`:
 
 - `.nvmrc` + `engines` + `packageManager` pin the toolchain; `package-lock.json` is committed and
-  installed with `--frozen-lockfile` in CI.
+  installed with `npm ci` (locked restore) in CI.
 - `tsconfig` enables `strict`, `noUnusedLocals/Parameters`, `exactOptionalPropertyTypes`, and
   `strictTemplates`; ESLint (`angular-eslint` + `consistent-type-imports`, `no-explicit-any`,
   `no-non-null-assertion`, `no-console`) runs with `--max-warnings=0`.

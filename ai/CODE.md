@@ -7,7 +7,7 @@
 
 | Gate | Requirement |
 | --- | --- |
-| Toolchain | `.nvmrc` + `engines` + `packageManager`; `npm ci --frozen-lockfile` |
+| Toolchain | `.nvmrc` + `engines` + `packageManager`; `npm ci` (fails on lockfile drift) |
 | Formatting | `npm run format:check` (Prettier, `printWidth: 120`, backend parity) |
 | Lint | `npm run lint` (`ng lint --max-warnings=0`) |
 | Types | `strict`, `noUnusedLocals/Parameters`, `exactOptionalPropertyTypes`, `strictTemplates` |

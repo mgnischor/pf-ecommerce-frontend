@@ -33,7 +33,7 @@ jobs:
           cache: npm
 
       - name: Restore (locked)
-        run: npm ci --frozen-lockfile
+        run: npm ci
 
       - name: Formatting (Prettier)
         run: npm run format:check
