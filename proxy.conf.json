@@ -1,0 +1,13 @@
+{
+    "$schema": "https://angular.dev/reference/configs/proxy-config",
+    "/api": {
+        // Backend Compose stack default (API_PORT:-8080 in docker-compose-dev.yml).
+        // When the backend .env overrides API_PORT (e.g. API_PORT=28080 on this machine),
+        // point the target at that port instead, or serve with an override file:
+        //   ng serve --proxy-config proxy.conf.local.json
+        "target": "http://127.0.0.1:8080",
+        "secure": false,
+        "changeOrigin": true,
+        "logLevel": "warn"
+    }
+}
