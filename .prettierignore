@@ -3,4 +3,5 @@ coverage/
 TestResults/
 node_modules/
 ai/**
+package-lock.json
 *.log

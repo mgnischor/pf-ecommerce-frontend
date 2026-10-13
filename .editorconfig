@@ -1,12 +1,13 @@
 # EditorConfig is awesome: https://EditorConfig.org
 # Formatting is enforced by Prettier (see .prettierrc); see ai/CODE.md.
+# Indentation mirrors pf-ecommerce-backend: 4 spaces, 2 for YAML.
 root = true
 
 [*]
 charset = utf-8
 end_of_line = lf
 indent_style = space
-indent_size = 2
+indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
