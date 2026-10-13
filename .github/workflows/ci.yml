@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Least-privilege token (mirrors pf-ecommerce-backend .github/workflows/ci.yml).
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+
+jobs:
+  quality:
+    name: Build, format, lint, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Restore (locked)
+        run: npm ci --frozen-lockfile
+
+      - name: Formatting (Prettier)
+        run: npm run format:check
+
+      - name: Lint (ESLint, warnings are errors)
+        run: npm run lint
+
+      - name: Build (production)
+        run: npm run build:ci
+
+      - name: Unit tests (Vitest)
+        run: npm run test:ci
+
+      - name: Vulnerable packages
+        run: npm audit --audit-level=high
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: ignore
+
+  containers:
+    name: Container image and Compose
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build the storefront image
+        run: docker build --build-arg VERSION=ci --build-arg REVISION="$GITHUB_SHA" -t ecommerce-storefront:ci .
