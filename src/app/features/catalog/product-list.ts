@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged, finalize } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, Subject, switchMap } from 'rxjs';
 import { toProblemDetails, type ProblemDetails } from '../../core/http/http-errors';
 import { Logger } from '../../core/observability/logger.service';
 import { EmptyState } from '../../shared/ui/empty-state';
@@ -96,6 +96,8 @@ export class ProductList {
     private readonly productsService = inject(ProductService);
     private readonly logger = inject(Logger);
     private readonly destroy = inject(DestroyRef);
+    /** Every load goes through one switchMap, so a newer query cancels the one in flight. */
+    private readonly loads = new Subject<{ cursor: string | null; q: string | null; sort: string }>();
 
     readonly search = new FormControl('', { nonNullable: true });
     readonly products = signal<readonly Product[]>([]);
@@ -106,6 +108,28 @@ export class ProductList {
     private sort = '-createdAt';
 
     constructor() {
+        this.loads
+            .pipe(
+                switchMap((load) =>
+                    this.productsService.list({ limit: 20, cursor: load.cursor, q: load.q, sort: load.sort }).pipe(
+                        catchError((error: unknown) => {
+                            const problem = toProblemDetails(error);
+                            this.problem.set(problem);
+                            this.isLoading.set(false);
+                            this.logger.warn('Product list failed', { status: String(problem.status) });
+                            return EMPTY;
+                        })
+                    )
+                ),
+                takeUntilDestroyed(this.destroy)
+            )
+            .subscribe((page) => {
+                this.products.update((current) => [...current, ...page.items]);
+                this.nextCursor.set(page.nextCursor);
+                this.hasMore.set(page.hasMore);
+                this.isLoading.set(false);
+            });
+
         this.search.valueChanges
             .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroy))
             .subscribe(() => this.reload());
@@ -119,13 +143,19 @@ export class ProductList {
     }
 
     onClearSearch(): void {
+        // A non-empty term goes through the debounced valueChanges path (one reload);
+        // an already empty term emits nothing there, so reload directly.
+        if (this.search.value === '') {
+            this.reload();
+            return;
+        }
         this.search.setValue('');
-        this.reload();
     }
 
     reload(): void {
         this.products.set([]);
         this.nextCursor.set(null);
+        this.hasMore.set(false);
         this.fetch(null);
     }
 
@@ -139,23 +169,6 @@ export class ProductList {
     private fetch(cursor: string | null): void {
         this.isLoading.set(true);
         this.problem.set(null);
-        this.productsService
-            .list({ limit: 20, cursor, q: this.search.value || null, sort: this.sort })
-            .pipe(
-                finalize(() => this.isLoading.set(false)),
-                takeUntilDestroyed(this.destroy)
-            )
-            .subscribe({
-                next: (page) => {
-                    this.products.update((current) => [...current, ...page.items]);
-                    this.nextCursor.set(page.nextCursor);
-                    this.hasMore.set(page.hasMore);
-                },
-                error: (error: unknown) => {
-                    const problem = toProblemDetails(error);
-                    this.problem.set(problem);
-                    this.logger.warn('Product list failed', { status: String(problem.status) });
-                },
-            });
+        this.loads.next({ cursor, q: this.search.value || null, sort: this.sort });
     }
 }
